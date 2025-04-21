@@ -14,6 +14,11 @@ def clear_string(string, r_char='*'):
     new_str = new_str.strip(r_char)
     
     return new_str.lower()
+    
+
+class DecklistSourceError(Exception):
+    def __repr__(self):
+        return 'decklist source error'
 
 
 
@@ -96,6 +101,16 @@ class Decklist(dict):
             file.close()
         
         return Decklist(src_string)
+        
+    @staticmethod
+    def universal_init(src):
+        try:
+            return Decklist.read_file(src)
+        except FileNotFoundError:
+            try:
+                return Decklist(src)
+            except ValueError:
+                raise DecklistSourceError
     
             
 if __name__ == '__main__':

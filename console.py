@@ -13,6 +13,8 @@ Env actions:
 
 
 from cards import *
+import logging
+import os
 
 
 class EnvLogger:
@@ -33,6 +35,7 @@ class EnvLogger:
             return
             
         cd, name = env.current_decklist
+        print(f'###  {name}  ###')
         for key in cd:
             print(f'{key} {cd[key]}')
         
@@ -69,14 +72,27 @@ class Env:
     
     def show_current_decklist(self, **kwargs):
         EnvLogger().show_current_decklist(self)
+        
+    def load_dir(self, **kwargs):
+        dir_name = kwargs['dir']
+        files = os.listdir(dir_name)
+        for file in files:
+            try:
+                src = dir_name + '/' + file
+                self.upload_decklist(src=src, name=file)
+            except DecklistSourceError:
+                pass
     
-    def __init__(self):
+    def __init__(self, name='env'):
+        self.name = name
         self.decklists = {}
         self.current_decklist = None
         self.actions = {'lu': self.look_up,
                         'upload': self.upload_decklist,
                         'show': self.show_current_decklist,
-                        'inspect': self.show_decklists,}
+                        'inspect': self.show_decklists,
+                        'load': self.load_dir,
+                        'change': self.change_current_decklist}
     
     @staticmethod
     def parse(string):
@@ -93,7 +109,7 @@ class Env:
 if __name__ == '__main__':
     env = Env()
     while True: 
-        x = input('env ')
+        x = input(f'{env.name} ')
         if x == 'q':
             break
         
@@ -101,5 +117,5 @@ if __name__ == '__main__':
             action = env.parse(x)
             env.actions[action['cmd']](**action['kwargs'])
         except Exception as e:
-            print(e)
+            logging.exception('message')
         
